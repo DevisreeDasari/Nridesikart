@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useClerk, useUser } from "@clerk/nextjs";
 
 interface NavItem {
   label: string;
@@ -34,6 +35,8 @@ const PillNav: React.FC<PillNavProps> = ({
   const pillRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isLoaded, isSignedIn } = useUser();
+  const { signOut } = useClerk();
 
   useEffect(() => {
     if (!navRef.current || !pillRef.current) return;
@@ -156,22 +159,45 @@ const PillNav: React.FC<PillNavProps> = ({
 
             {/* Auth Buttons in Mobile Menu */}
             <li className="border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
-              <Link
-                href="/sign-in"
-                className="block py-3 px-4 text-[16px] font-medium rounded-lg text-center bg-transparent text-orange-600 dark:text-orange-400 border-2 border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Sign In
-              </Link>
+              {isLoaded && isSignedIn ? (
+                <Link
+                  href="/account"
+                  className="block py-3 px-4 text-[16px] font-medium rounded-lg text-center bg-transparent text-orange-600 dark:text-orange-400 border-2 border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Account
+                </Link>
+              ) : (
+                <Link
+                  href="/sign-in"
+                  className="block py-3 px-4 text-[16px] font-medium rounded-lg text-center bg-transparent text-orange-600 dark:text-orange-400 border-2 border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+              )}
             </li>
             <li>
-              <Link
-                href="/sign-up"
-                className="block py-3 px-4 text-[16px] font-medium rounded-lg text-center bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Sign Up
-              </Link>
+              {isLoaded && isSignedIn ? (
+                <button
+                  type="button"
+                  className="w-full block py-3 px-4 text-[16px] font-medium rounded-lg text-center bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
+                  onClick={async () => {
+                    setIsMobileMenuOpen(false);
+                    await signOut({ redirectUrl: "/" });
+                  }}
+                >
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  href="/sign-up"
+                  className="block py-3 px-4 text-[16px] font-medium rounded-lg text-center bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              )}
             </li>
           </ul>
         </div>

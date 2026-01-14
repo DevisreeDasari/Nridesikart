@@ -7,6 +7,7 @@ import { ShoppingCart, Sun, Moon, Users, Target, Heart, Globe } from "lucide-rea
 import { useTheme } from "next-themes";
 import PillNav from "@/components/PillNav";
 import ShootingStarsThemed from "@/components/ShootingStarsThemed";
+import AuthAvatarMenu from "@/components/AuthAvatarMenu";
 
 export default function AboutPage() {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -83,20 +84,7 @@ export default function AboutPage() {
             <ShoppingCart className="w-5 h-5 text-orange-600 dark:text-orange-400" strokeWidth={2} />
           </Link>
 
-          <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/sign-in"
-              className="px-6 py-2 h-[44px] flex items-center justify-center rounded-full border-2 border-orange-500 text-orange-600 dark:text-orange-400 dark:border-orange-400 font-semibold text-sm hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/sign-up"
-              className="px-6 py-2 h-[44px] flex items-center justify-center rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold text-sm hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg"
-            >
-              Sign Up
-            </Link>
-          </div>
+          <AuthAvatarMenu />
         </div>
       </div>
 

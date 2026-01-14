@@ -3,14 +3,26 @@
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CustomerOnboardingPage() {
   const { user, isLoaded } = useUser();
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!mounted || !isLoaded) return;
+    if (!user) return;
+
+    const onboarded = user.publicMetadata?.onboarded === true;
+    if (onboarded) {
+      router.replace("/");
+    }
+  }, [isLoaded, mounted, router, user]);
 
   if (!mounted || !isLoaded) {
     return (
@@ -19,6 +31,34 @@ export default function CustomerOnboardingPage() {
       </div>
     );
   }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950">
+        <div className="bg-white dark:bg-gray-800/50 backdrop-blur-md rounded-3xl p-8 border-2 border-orange-200 dark:border-orange-600 shadow-2xl text-center">
+          <p className="text-lg text-gray-700 dark:text-gray-300">Please sign in to continue.</p>
+          <div className="mt-6">
+            <Link
+              href="/sign-in"
+              className="inline-block px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg"
+            >
+              Sign In
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const handleComplete = async (redirectTo: string) => {
+    try {
+      await fetch("/api/onboarding/complete", {
+        method: "POST"
+      });
+    } finally {
+      router.push(redirectTo);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-red-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950 transition-colors duration-300">
@@ -57,18 +97,20 @@ export default function CustomerOnboardingPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/services"
+            <button
+              type="button"
+              onClick={() => handleComplete("/services")}
               className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold text-lg rounded-full hover:from-orange-600 hover:to-red-600 transition-all duration-300 shadow-lg hover:scale-105 text-center"
             >
               Explore Services
-            </Link>
-            <Link
-              href="/"
+            </button>
+            <button
+              type="button"
+              onClick={() => handleComplete("/")}
               className="px-8 py-4 border-2 border-orange-500 text-orange-600 dark:text-orange-400 font-bold text-lg rounded-full hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-300 text-center"
             >
               Go to Homepage
-            </Link>
+            </button>
           </div>
         </div>
       </div>
